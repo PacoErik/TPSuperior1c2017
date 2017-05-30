@@ -13,15 +13,14 @@ function abrirVentanaPrincipal ()
                  "titleposition","centertop","fontsize",11,"fontname","Arial");
              
   botonCoeficientes = uicontrol (entornoPrincipal,"string","Coeficientes", ...
-                 "position",[125,250,300,100],"callback",{@abrirVentanaCoeficientes,ventanaPrincipal}, ...
+                 "position",[125,250,300,100],"callback",{@abrirVentanaCoeficientes}, ...
                  "backgroundcolor",[.8,.8,.8]);
   botonPCG = uicontrol (entornoPrincipal,"string","Ceros, polos y ganancia", ...
-                 "position",[125,100,300,100],"callback",{@abrirVentanaCPG,ventanaPrincipal}, ...
+                 "position",[125,100,300,100],"callback",{@abrirVentanaCPG}, ...
                  "backgroundcolor",[.8,.8,.8]);
 endfunction
 
-function abrirVentanaCoeficientes (handlesource,event,idVentana)
-  close (idVentana,"force");
+function abrirVentanaCoeficientes (handlesource,event)
   ventanaCoeficientes = figure;
   set (ventanaCoeficientes,"name","Función de transferencia: Coeficientes");
   set (ventanaCoeficientes,"numbertitle","off");
@@ -33,14 +32,14 @@ function abrirVentanaCoeficientes (handlesource,event,idVentana)
                "string","Coeficientes del numerador:","position",[10,350,300,40], ... 
                "fontsize",16);  
   coeficientesNumerador = uicontrol (entornoCoeficientes, "style", "edit", ...
-               "string", "2,7,4,3", "position",[20,310,290,40], ...
+               "string", "2,7,4", "position",[20,310,290,40], ...
                "fontsize",14,"backgroundcolor",[.5,.5,.5]);              
                
   textoCoeficientesDenominador = uicontrol (entornoCoeficientes,"style","text", ...
                "string","Coeficientes del denominador:","position",[10,250,300,40], ... 
                "fontsize",16);  
   coeficientesDenominador = uicontrol (entornoCoeficientes, "style", "edit", ...
-               "string", "6,1,9", "position",[20,210,290,40], ...
+               "string", "6,1,9,3", "position",[20,210,290,40], ...
                "fontsize",14,"backgroundcolor",[.5,.5,.5]);
                
   botonExpresion = uicontrol (entornoCoeficientes,"string","Expresión", ...
@@ -77,8 +76,7 @@ function abrirVentanaCoeficientes (handlesource,event,idVentana)
                "backgroundcolor",[.2,.8,.2],"fontsize",16);
 endfunction
 
-function abrirVentanaCPG (handlesource,event,idVentana)
-  close (idVentana,"force");
+function abrirVentanaCPG (handlesource,event)
   ventanaCPG = figure;
   set (ventanaCPG,"name","Función de transferencia: Ceros, polos y ganancia");
   set (ventanaCPG,"numbertitle","off");
@@ -91,14 +89,14 @@ function abrirVentanaCPG (handlesource,event,idVentana)
                "string","Ceros:","position",[40,320,80,40], ... 
                "fontsize",16);  
   ceros = uicontrol (entornoCPG, "style", "edit", ...
-               "string", "1,1,3,4", "position",[150,320,200,40], ...
+               "string", "1,1,3", "position",[150,320,200,40], ...
                "fontsize",14,"backgroundcolor",[.5,.5,.5]);        
                
   textoPolos = uicontrol (entornoCPG,"style","text", ...
                "string","Polos:","position",[40,250,80,40], ... 
                "fontsize",16);  
   polos = uicontrol (entornoCPG, "style", "edit", ...
-               "string", "3,4,5", "position",[150,250,200,40], ...
+               "string", "3,4,5,6", "position",[150,250,200,40], ...
                "fontsize",14,"backgroundcolor",[.5,.5,.5]);  
                
   textoGanancia = uicontrol (entornoCPG,"style","text", ...
@@ -196,10 +194,27 @@ function mostrarGanancia (handlesource,event,numBox,denBox,gainBox,hayGanancia)
   helpdlg (evalc ("g"),"Ganancia");
 endfunction
 
+function str = obtenerExpresionCPG (ft)
+  [z,p,g] = tf2zp(ft);
+  str = num2str (g);
+  cantidadceros = length (z);
+  cantidadpolos = length (p);
+  for i = 1:cantidadceros 
+    str = strcat(str, " [s - (",num2str (z(i)),")] ");
+  endfor   
+  str = strcat(str, "\n");
+  strlen = length (str);
+  for i = 1:strlen
+    str = strcat(str, "-");
+  endfor
+  str = strcat(str, "\n");
+  for i = 1:cantidadpolos 
+    str = strcat(str, " [s - (",num2str (p(i)),")] ");
+  endfor
+endfunction  
 function mostrarExpresionCPG (handlesource,event,numBox,denBox,gainBox,hayGanancia)
   ft = procesarFT (numBox,denBox,gainBox,hayGanancia);
-  [z,p,g] = tf2zp(ft);
-  helpdlg (strcat (evalc ("ft"),"\n",evalc ("z"),"\n",evalc ("p"),"\n",evalc ("g")),"Modelo PCG");
+  helpdlg (obtenerExpresionCPG(ft), "Expresion ceros, polos, ganancia");
 endfunction
 
 function mostrarGrafico (handlesource,event,numBox,denBox,gainBox,hayGanancia)
@@ -235,7 +250,7 @@ function mostrarTodo (handlesource,event,numBox,denBox,gainBox,hayGanancia)
   [z,p,g] = tf2zp(ft);
   mostrarGrafico(handlesource,event,numBox,denBox,gainBox,hayGanancia)
   helpdlg (strcat (evalc ("ft"),"\n",evalc ("z"),"\n",evalc ("p"), ...
-  "\n",evalc ("g"),"\n",estabilidad (p)),"Todos los datos");
+  "\n",evalc ("g"),"\nExpresion CPG\n",obtenerExpresionCPG(ft),"\n\n",estabilidad (p)),"Todos los datos");
 endfunction
 
 abrirVentanaPrincipal();
