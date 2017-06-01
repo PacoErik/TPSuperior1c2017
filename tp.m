@@ -203,14 +203,17 @@ function str = obtenerExpresionCPG (ft)
     str = strcat(str, " [s - (",num2str (z(i)),")] ");
   endfor   
   str = strcat(str, "\n");
-  strlen = length (str);
+  
+  str2 = "";
+  for i = 1:cantidadpolos 
+    str2 = strcat(str2, " [s - (",num2str (p(i)),")] ");
+  endfor
+  strlen = length (str2);
   for i = 1:strlen
     str = strcat(str, "-");
   endfor
   str = strcat(str, "\n");
-  for i = 1:cantidadpolos 
-    str = strcat(str, " [s - (",num2str (p(i)),")] ");
-  endfor
+  str = strcat(str, str2);
 endfunction  
 function mostrarExpresionCPG (handlesource,event,numBox,denBox,gainBox,hayGanancia)
   ft = procesarFT (numBox,denBox,gainBox,hayGanancia);
